@@ -59,6 +59,7 @@ type Config struct {
 	RejectReadOnly          bool // Reject read-only connections
 }
 
+var delimiter string
 // NewConfig creates a new Config and sets default values.
 func NewConfig() *Config {
 	return &Config{
@@ -142,155 +143,81 @@ func (cfg *Config) FormatDSN() string {
 		hasParam = true
 		buf.WriteString("?allowAllFiles=true")
 	}
+	
+	if hasParam {
+			delimiter = "&"
+		} else {
+			delimiter = "?"
+		}
 
 	if cfg.AllowCleartextPasswords {
-		if hasParam {
-			buf.WriteString("&allowCleartextPasswords=true")
-		} else {
-			hasParam = true
-			buf.WriteString("?allowCleartextPasswords=true")
-		}
+			buf.WriteString(delimiter+"allowCleartextPasswords=true")
 	}
 
 	if !cfg.AllowNativePasswords {
-		if hasParam {
-			buf.WriteString("&allowNativePasswords=false")
-		} else {
-			hasParam = true
-			buf.WriteString("?allowNativePasswords=false")
-		}
+			buf.WriteString(delimiter+"allowNativePasswords=false")
 	}
 
 	if cfg.AllowOldPasswords {
-		if hasParam {
-			buf.WriteString("&allowOldPasswords=true")
-		} else {
-			hasParam = true
-			buf.WriteString("?allowOldPasswords=true")
-		}
+			buf.WriteString(delimiter+"allowOldPasswords=true")
 	}
 
 	if cfg.ClientFoundRows {
-		if hasParam {
-			buf.WriteString("&clientFoundRows=true")
-		} else {
-			hasParam = true
-			buf.WriteString("?clientFoundRows=true")
-		}
+			buf.WriteString(delimiter+"clientFoundRows=true")
 	}
 
 	if col := cfg.Collation; col != defaultCollation && len(col) > 0 {
-		if hasParam {
-			buf.WriteString("&collation=")
-		} else {
-			hasParam = true
-			buf.WriteString("?collation=")
-		}
+			buf.WriteString(delimiter+"collation=")
 		buf.WriteString(col)
 	}
 
 	if cfg.ColumnsWithAlias {
-		if hasParam {
-			buf.WriteString("&columnsWithAlias=true")
-		} else {
-			hasParam = true
-			buf.WriteString("?columnsWithAlias=true")
-		}
+			buf.WriteString(delimiter+"columnsWithAlias=true")
 	}
 
 	if cfg.InterpolateParams {
-		if hasParam {
-			buf.WriteString("&interpolateParams=true")
-		} else {
-			hasParam = true
-			buf.WriteString("?interpolateParams=true")
-		}
+			buf.WriteString(delimiter+"interpolateParams=true")
 	}
 
 	if cfg.Loc != time.UTC && cfg.Loc != nil {
-		if hasParam {
-			buf.WriteString("&loc=")
-		} else {
-			hasParam = true
-			buf.WriteString("?loc=")
-		}
+		buf.WriteString(delimiter+"loc=")
 		buf.WriteString(url.QueryEscape(cfg.Loc.String()))
 	}
 
 	if cfg.MultiStatements {
-		if hasParam {
-			buf.WriteString("&multiStatements=true")
-		} else {
-			hasParam = true
-			buf.WriteString("?multiStatements=true")
-		}
+			buf.WriteString(delimiter+"multiStatements=true")
 	}
 
 	if cfg.ParseTime {
-		if hasParam {
-			buf.WriteString("&parseTime=true")
-		} else {
-			hasParam = true
-			buf.WriteString("?parseTime=true")
-		}
+			buf.WriteString(delimiter+"parseTime=true")
 	}
 
 	if cfg.ReadTimeout > 0 {
-		if hasParam {
-			buf.WriteString("&readTimeout=")
-		} else {
-			hasParam = true
-			buf.WriteString("?readTimeout=")
-		}
+		buf.WriteString(delimiter+"readTimeout=")
 		buf.WriteString(cfg.ReadTimeout.String())
 	}
 
 	if cfg.RejectReadOnly {
-		if hasParam {
-			buf.WriteString("&rejectReadOnly=true")
-		} else {
-			hasParam = true
-			buf.WriteString("?rejectReadOnly=true")
-		}
+			buf.WriteString(delimiter+"rejectReadOnly=true")
 	}
 
 	if cfg.Timeout > 0 {
-		if hasParam {
-			buf.WriteString("&timeout=")
-		} else {
-			hasParam = true
-			buf.WriteString("?timeout=")
-		}
+		buf.WriteString(delimiter+"timeout=")
 		buf.WriteString(cfg.Timeout.String())
 	}
 
 	if len(cfg.TLSConfig) > 0 {
-		if hasParam {
-			buf.WriteString("&tls=")
-		} else {
-			hasParam = true
-			buf.WriteString("?tls=")
-		}
+		buf.WriteString(delimiter+"tls=")
 		buf.WriteString(url.QueryEscape(cfg.TLSConfig))
 	}
 
 	if cfg.WriteTimeout > 0 {
-		if hasParam {
-			buf.WriteString("&writeTimeout=")
-		} else {
-			hasParam = true
-			buf.WriteString("?writeTimeout=")
-		}
+		buf.WriteString(delimiter+"writeTimeout=")
 		buf.WriteString(cfg.WriteTimeout.String())
 	}
 
 	if cfg.MaxAllowedPacket != defaultMaxAllowedPacket {
-		if hasParam {
-			buf.WriteString("&maxAllowedPacket=")
-		} else {
-			hasParam = true
-			buf.WriteString("?maxAllowedPacket=")
-		}
+		buf.WriteString(delimiter+"maxAllowedPacket=")
 		buf.WriteString(strconv.Itoa(cfg.MaxAllowedPacket))
 
 	}
@@ -303,13 +230,7 @@ func (cfg *Config) FormatDSN() string {
 		}
 		sort.Strings(params)
 		for _, param := range params {
-			if hasParam {
-				buf.WriteByte('&')
-			} else {
-				hasParam = true
-				buf.WriteByte('?')
-			}
-
+			buf.WriteByte(delimiter)
 			buf.WriteString(param)
 			buf.WriteByte('=')
 			buf.WriteString(url.QueryEscape(cfg.Params[param]))
